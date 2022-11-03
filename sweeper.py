@@ -6,8 +6,6 @@ pg.init() # initialize pygame modules
 
 
 
-
-
 # Return surface with requested size (resizes tiles for width/height)
 def get_tiles(size=(1, 1), img=None, width_px=None, height_px=None):
     #if width_px is None or height_px is None:
@@ -69,13 +67,27 @@ def click_tile(pos):
     t.clicked = True
     screen.blit(tile_act, t)
 
+
+def set_mines(tile_set, num_mines):
+    tiles_flat = [t for tl in tile_set for t in tl]
+    random.shuffle(tiles_flat)
+    for t in tiles_flat[:num_mines]:
+        t.is_mine = True
+        screen.blit(tile_mine, t)
+        
+
+
 #size = width, height = 1080, 720
 tile_img = pg.image.load('tile.png')
 tile_act = pg.image.load('tile_dark.png')
+tile_mine = pg.image.load('tile_mine.png')
 
 tile_size = 18, 20
 tiles = get_tiles(tile_size, tile_img)
 screen = draw_tiles(tile_img, tiles)
+
+num_mines = 75
+set_mines(tiles, num_mines)
 
 while 1:
     for event in pg.event.get():
@@ -84,8 +96,6 @@ while 1:
         if mouse[0]:
             pos = pg.mouse.get_pos()
             click_tile(pos)
-
-
 
     pg.display.flip()
 
