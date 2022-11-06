@@ -43,7 +43,8 @@ def draw_tiles(img, tile_grid):
     return screen
 
 
-def get_tile_clicked(tile_size, x, y):
+def get_tile_clicked(pos):
+    x, y = pos
     surf = pg.display.get_surface()
     s_width = surf.get_width()
     s_height = surf.get_height()
@@ -54,16 +55,13 @@ def get_tile_clicked(tile_size, x, y):
     # print(f"Tiles: {t_width}, {t_height}")
     # print(f"Click: {x}, {y}")
     # print(f"Return: {xt}, {yt}")
+    return tiles[yt][xt]
 
-    return xt, yt
-
-
-def click_tile(pos):
-    x, y = pos
-    xt, yt = get_tile_clicked(tile_size, x, y)
-    t = tiles[yt][xt]
-    t.clicked = True
-    return t
+# Get the tile at position clicked
+#def get_tile(pos):
+#    x, y = pos
+#    xt, yt = get_tile_clicked(tile_size, x, y)
+#s    return t
 
 
 def increment_mines(add_list):
@@ -123,6 +121,7 @@ game_over = False
 # size = width, height = 1080, 720
 tile_img = pg.image.load("imgs/tile.png")
 tile_mine = pg.image.load("imgs/tile_mine.png")
+tile_flag = pg.image.load("imgs/tile_flag.png")
 
 tile_nums = {}
 
@@ -148,14 +147,24 @@ while 1:
 
         if event.type == pg.MOUSEBUTTONUP:
             pos = pg.mouse.get_pos()
-            t = click_tile(pos)
-            print(t)
-            if t.is_mine:
-                screen.blit(tile_mine, t)
-                game_over = True
-            else:
-                # if 0, click_tile recursively for surrounding tiles
-                screen.blit(tile_nums[t.num_mines], t)
+            t = get_tile_clicked(pos)
+            if event.button == 1 and not t.flagged:    
+                t.clicked = True
+                print(t)
+                if t.is_mine:
+                    screen.blit(tile_mine, t)
+                    game_over = True
+                else:
+                    # if 0, get_tile_clicked recursively for surrounding tiles
+                    screen.blit(tile_nums[t.num_mines], t)
+                    
+            if event.button == 3 and not t.clicked:
+                if t.flagged:
+                    t.flagged = False
+                else:
+                    t.flagged = True
+                screen.blit(tile_flag, t)
+
 
     pg.display.flip()
 
