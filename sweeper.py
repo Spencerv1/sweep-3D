@@ -2,14 +2,6 @@ import pygame as pg
 from tile import Tile, TileSet, TileImgs
 import sys
 
-pg.init()  # initialize pygame modules
-game_over = False
-tile_set = TileSet(20, 20, 75)
-
-
-
-
-
 def draw_tiles(img, tile_set):
     width = tile_set.size_x * img.get_width()
     height = tile_set.size_y * img.get_height()
@@ -21,6 +13,22 @@ def draw_tiles(img, tile_set):
 
     return screen
 
+def click_tile(tile):
+    tile.clicked = True
+    screen.blit(TileImgs.nums[tile.num_mines], tile)
+    if tile.num_mines == 0:
+        t_near = tile_set.get_tiles_near(tile.x, tile.y)
+        #print(t_near)
+        for t in t_near:
+            #screen.blit(TileImgs.nums[t.num_mines], t)
+            #print(t_near)
+            if not t.clicked:
+                print(f'Click tile: {t.x}, {t.y}')
+                click_tile(t)
+
+pg.init()  # initialize pygame modules
+game_over = False
+tile_set = TileSet(20, 20, 75)
 screen = draw_tiles(TileImgs.reg, tile_set)
 
 
@@ -37,8 +45,8 @@ while 1:
             pos = pg.mouse.get_pos()
             t = tile_set.get_tile_clicked(pos, pg.display.get_surface())
             if event.button == 1 and not t.flagged:    
-                t.clicked = True
-                print(t)
+                #t.clicked = True
+                #print(t)
                 if t.is_mine:
                     for m in tile_set.mines:
                         screen.blit(TileImgs.mine, m)
@@ -46,9 +54,7 @@ while 1:
                     game_over = True
                 else:
                     # if 0, get_tile_clicked recursively for surrounding tiles
-                    if t.num_mines == 0:
-                        pass
-                    screen.blit(TileImgs.nums[t.num_mines], t)
+                    click_tile(t)
 
                     
             if event.button == 3 and not t.clicked:

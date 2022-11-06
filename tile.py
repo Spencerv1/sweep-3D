@@ -15,12 +15,14 @@ class TileImgs():
 
 class Tile:
     
-    def __init__(self, rect):
+    def __init__(self, rect, x, y):
         self.clicked = False
         self.flagged = False
         self.is_mine = False
         self.rect = rect
         self.num_mines = 0
+        self.x = x # Position in tile grid
+        self.y = y
 
     def __str__(self):
         r = f'Clicked: {self.clicked} Mine: {self.is_mine} Num Mines: {self.num_mines} Flagged: {self.flagged}'
@@ -61,11 +63,11 @@ class TileSet():
 
         grid = []
 
-        for th in range(size_y):
+        for h, th in enumerate(range(size_y)):
             grid.append([])
-            for tw in range(size_x):
+            for w, tw in enumerate(range(size_x)):
                 tr = t_rect.move(x, y)
-                tile = Tile(tr)
+                tile = Tile(tr, h, w)
                 grid[th].append(tile)
                 x += t_width
             x = 0
@@ -84,18 +86,18 @@ class TileSet():
         return self.grid[yt][xt]
 
 
-    # Returns the valid indexes surrounding tile
+    # Returns the tiles surrounding a tile
     def get_tiles_near(self, tile_list_i, tile_i):
         tl_i = tile_list_i
         t_i = tile_i
-        indexes = []
+        tiles = []
         for x, y in TileSet.index_mods:
             if t_i + x < 0 or t_i + x >= len(self.grid[0]):
                 continue
             if tl_i + y < 0 or tl_i + y >= len(self.grid):
                 continue
-            indexes.append((t_i+x, tl_i+y))
-        return indexes
+            tiles.append(self.grid[tl_i+y][t_i+x])
+        return tiles
 
 
     # Set the minefield and precalculate all tile numbers
@@ -112,10 +114,9 @@ class TileSet():
                 if not t.is_mine:
                     continue
 
-                valid_indexes = self.get_tiles_near(tl_i, t_i)
-                for x, y in valid_indexes:
-                    #print(t, mx, my)
-                    self.grid[y][x].num_mines += 1
+                tiles_near = self.get_tiles_near(tl_i, t_i)
+                for tn in tiles_near:
+                    tn.num_mines += 1
 
         return self.mines    
 
